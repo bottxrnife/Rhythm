@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "RhythmApp",
+    "slug": "RhythmApp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Rhythm needs camera access to record short clips of your daily routines for verification.",
+        "NSMicrophoneUsageDescription": "Rhythm needs microphone access to capture audio with your routine clips."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "usesCleartextTraffic": true,
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
+      "package": "com.anonymous.RhythmApp"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font",
+      "expo-video",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Rhythm needs camera access to record short clips of your daily routines for verification.",
+          "microphonePermission": "Rhythm needs microphone access to capture audio with your routine clips.",
+          "recordAudioAndroid": true
+        }
+      ],
+      "react-native-quick-crypto",
+      "expo-build-properties"
+    ]
+  }
+}
