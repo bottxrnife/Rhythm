@@ -333,3 +333,159 @@ Rhythm Verification Server
 
   ✗ NOT VERIFIED — no person or product visible (confidence 0.10)
   model reason: The video shows a laptop screen with code, not a person brushing teeth or any Colgate product.
+
+Rhythm Verification Server
+  Model:    us.amazon.nova-2-lite-v1:0
+  Region:   us-east-1
+  Port:     3001
+  Encode:   15fps @ 480px long-edge, preset=ultrafast, crf=30, max 30s
+  ffmpeg:   ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers
+  Log file: /Users/martinliu/Downloads/rhythm/Rhythm/backend/server.log
+
+  Nova 2 Lite: connected
+
+  Listening on http://0.0.0.0:3001/verify
+  Tail logs with: tail -f /Users/martinliu/Downloads/rhythm/Rhythm/backend/server.log
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+▶ 08:00:07 POST /verify  id=e6526875
+  routine: drink-water-glass
+  sponsor: none (unsponsored)
+  wallet:  6Ee9n8tTAX...vMxfCp
+  location: 25.8438,-80.1212
+  payload: 35.24 MB base64, read in 32941ms
+  video:   26.43 MB decoded (27,717,175 bytes)
+  Calling Nova 2 Lite (us.amazon.nova-2-lite-v1:0)...
+  Encode: input  1920x1080 · 30.0fps · 10.9s · h264 · 20325kbps (26.43 MB)
+  Encode: output 270x480 · 15.0fps · 10.9s · h264 · 213kbps (285.5 KB, 1.1% of input) in 562ms
+
+  ── Nova raw response ──
+  stopReason:  end_turn
+  tokens:      in=2185  out=82  total=2267
+  bedrock latencyMs: 1083
+  judgment (parsed from Nova output):
+    {
+      "verified": true,
+      "confidence": 0.9,
+      "product_visible": true,
+      "product_in_use": true,
+      "routine_completed": true,
+      "appears_genuine": true,
+      "reason": "The person is seen holding a glass of water and drinking it.",
+      "short_reason": "routine verified"
+    }
+
+  ── Policy ──
+  sponsored:   False   confidence: 0.90   verified(model): True
+  ✓ all policy checks passed
+
+  ── Timing breakdown ──
+  encode:          658 ms
+  bedrock:        1420 ms
+  read+parse:    32941 ms
+  other:            75 ms
+  total:         35094 ms
+
+  ✓ VERIFIED — routine verified (confidence 0.90)
+  x402 payment_id: x402_3f2ed27854473fd2_1778155242
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+▶ 08:10:34 POST /verify  id=02150073
+  routine: drink-water-glass
+  sponsor: none (unsponsored)
+  wallet:  6Ee9n8tTAX...vMxfCp
+  location: 25.8438,-80.1212
+  payload: 11.61 MB base64, read in 6841ms
+  video:   8.71 MB decoded (9,132,113 bytes)
+  Calling Nova 2 Lite (us.amazon.nova-2-lite-v1:0)...
+  Encode: input  1920x1080 · 30.0fps · 3.6s · h264 · 20285kbps (8.71 MB)
+  Encode: output 270x480 · 15.0fps · 3.6s · h264 · 293kbps (129.0 KB, 1.4% of input) in 361ms
+
+  ── Nova raw response ──
+  stopReason:  end_turn
+  tokens:      in=2017  out=81  total=2098
+  bedrock latencyMs: 3251
+  judgment (parsed from Nova output):
+    {
+      "verified": true,
+      "confidence": 0.9,
+      "product_visible": true,
+      "product_in_use": true,
+      "routine_completed": true,
+      "appears_genuine": true,
+      "reason": "The person is clearly drinking from a glass in the video.",
+      "short_reason": "routine verified"
+    }
+
+  ── Policy ──
+  sponsored:   False   confidence: 0.90   verified(model): True
+  ✓ all policy checks passed
+
+  ── Timing breakdown ──
+  encode:          456 ms
+  bedrock:        3398 ms
+  read+parse:     6841 ms
+  other:            26 ms
+  total:         10721 ms
+
+  ✓ VERIFIED — routine verified (confidence 0.90)
+  x402 payment_id: x402_b153bc7752b6175a_1778155844
+
+Shutting down...
+
+Rhythm Verification Server
+  Model:    us.amazon.nova-2-lite-v1:0
+  Region:   us-east-1
+  Port:     3001
+  Encode:   15fps @ 480px long-edge, preset=ultrafast, crf=30, max 30s
+  ffmpeg:   ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers
+  Log file: /Users/martinliu/Downloads/rhythm/Rhythm/backend/server.log
+
+  Nova 2 Lite: connected
+
+  Listening on http://0.0.0.0:3001/verify
+  Tail logs with: tail -f /Users/martinliu/Downloads/rhythm/Rhythm/backend/server.log
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+▶ 08:22:54 POST /verify  id=46f73fba
+  routine: drink-water-bottle
+  sponsor: none (unsponsored)
+  wallet:  6Ee9n8tTAX...vMxfCp
+  location: 25.8438,-80.1212
+  payload: 12.27 MB base64, read in 6965ms
+  video:   9.20 MB decoded (9,651,082 bytes)
+  Calling Nova 2 Lite (us.amazon.nova-2-lite-v1:0)...
+  Encode: input  1920x1080 · 30.0fps · 3.8s · h264 · 20118kbps (9.20 MB)
+  Encode: output 270x480 · 15.0fps · 3.9s · h264 · 304kbps (143.7 KB, 1.5% of input) in 270ms
+
+  ── Nova raw response ──
+  stopReason:  end_turn
+  tokens:      in=1927  out=88  total=2015
+  bedrock latencyMs: 2114
+  judgment (parsed from Nova output):
+    {
+      "verified": true,
+      "confidence": 0.9,
+      "product_visible": true,
+      "product_in_use": true,
+      "routine_completed": true,
+      "appears_genuine": true,
+      "reason": "The person is seen drinking from a clear glass, which aligns with the routine of drinking water.",
+      "short_reason": "routine verified"
+    }
+
+  ── Policy ──
+  sponsored:   False   confidence: 0.90   verified(model): True
+  ✓ all policy checks passed
+
+  ── Timing breakdown ──
+  encode:          349 ms
+  bedrock:        2264 ms
+  read+parse:     6965 ms
+  other:            28 ms
+  total:          9606 ms
+
+  ✓ VERIFIED — routine verified (confidence 0.90)
+  x402 payment_id: x402_e0a938f4c83ddf76_1778156584

@@ -8,6 +8,7 @@ import { Button } from '../components';
 import { useAppState } from '../state/AppState';
 import { colors, typography, spacing } from '../theme';
 import type { RootStackParamList } from '../navigation/types';
+import { SOLANA_WALLET_CHAIN } from '../config/solana';
 
 const HERO_URI =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuAt7HKHkTWdZda6Nt0cdSURmJkwld71VI3WyB75yDA6TMXTGES9tTSb1VKSAyYOm7m57p7RFyWfMU11PErrFHZ5tbpYFrlwOGlm0odU45BBFAZAcS_MYp5X3Fige91xgUUiuYkSO-K1Gc1PSdnz6aTHbF4ULOjl6POXwvAVH-TFlG3AHZ2Atcg6rke2g0Y7vlN2zEV5NNzTQ4hGWkQ9kOJ44zIqWCoqVdIi52V5l7l7tbJ0Szpf-5F2VW1v3IHUWo0kAmVKbiApjxy1';
@@ -25,6 +26,7 @@ export function WelcomeScreen({ navigation }: Props) {
     setConnecting(true);
     try {
       await signIn({
+        chain: SOLANA_WALLET_CHAIN,
         domain: 'rhythm.app',
         statement: 'Sign in to Rhythm to verify your daily routines and earn rewards.',
       });
