@@ -108,3 +108,5 @@ Nova 2 Lite is automatically enabled on first invocation — no manual model acc
 - Memory: 512MB (base64 decode of 30s video ~15MB)
 - Video stored in S3 for audit trail — add lifecycle policy to expire after 90 days
 - Use `global.amazon.nova-2-lite-v1:0` for cross-region inference if us-east-1 is throttled
+
+> Note: The local x402 gateway setup lives on the **`x402` branch** (not `main`).

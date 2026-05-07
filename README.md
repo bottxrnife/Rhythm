@@ -143,6 +143,12 @@ The app will typically auto-detect the host and call `http://<host>:3001/verify`
 
 Note: the local verifier uses `ffmpeg` for optional video compression; install it if you see compression-related errors.
 
+### x402-gated local verification (paid `POST /verify`)
+
+This setup lives on the **`x402` branch** (not `main`).
+
+See `backend/README.md` on the `x402` branch for the exact commands.
+
 For AWS deployment instructions, see `backend/README.md`.
 
 ## Status
