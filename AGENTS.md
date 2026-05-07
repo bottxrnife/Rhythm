@@ -30,7 +30,7 @@ The core loop:
 | Verification | Local Python server OR AWS Lambda (Python 3.12) → Amazon Bedrock (Nova 2 Lite) |
 | Storage | AWS S3 (video captures, Lambda only) |
 | Payment | x402 (HTTP 402-based stablecoin micropayments) |
-| Blockchain | Solana devnet or mainnet-beta (Memo Program for on-chain recording) |
+| Blockchain | Solana devnet (Memo Program for on-chain recording) |
 | Identity | Solana Name Service (.skr domains via @onsol/tldparser-kit) |
 | Crypto | @solana/web3.js 1.98, react-native-quick-crypto |
 | Fonts | Plus Jakarta Sans (4 weights via @expo-google-fonts) |
@@ -54,7 +54,7 @@ RhythmApp/
 ├── jest.setup.js                    # Module mocks (AsyncStorage, haptics, camera, icons, wallet, etc.)
 ├── babel.config.jest.js             # Babel config for jest
 ├── metro.config.js                  # Metro bundler config
-├── .env / .env.example              # EXPO_PUBLIC_VERIFY_URL + EXPO_PUBLIC_SOLANA_CLUSTER
+├── .env / .env.example              # EXPO_PUBLIC_VERIFY_URL
 │
 ├── src/
 │   ├── components/                  # Reusable UI primitives
@@ -460,7 +460,6 @@ Create a `.env` in the repo root from `.env.example`:
 
 ```
 EXPO_PUBLIC_VERIFY_URL=http://<YOUR_LAN_IP>:3001/verify
-EXPO_PUBLIC_SOLANA_CLUSTER=devnet
 ```
 
 For the local backend, create `backend/.env` with AWS credentials:
@@ -603,7 +602,7 @@ EXPO_PUBLIC_VERIFY_URL=https://YOUR_API_ID.execute-api.us-east-1.amazonaws.com/v
 - `Chip`, `Button`, `BackHeader`, `TopBar`: native-driven press feedback.
 
 ### Config Source-of-Truth
-- `App.tsx` now uses `SOLANA_WALLET_CHAIN` / `SOLANA_RPC_URL` from `src/config/solana.ts` instead of hardcoding devnet, so switching clusters via `EXPO_PUBLIC_SOLANA_CLUSTER` actually works end-to-end.
+- `App.tsx` uses `SOLANA_WALLET_CHAIN` / `SOLANA_RPC_URL` from `src/config/solana.ts` (devnet-only).
 
 ### Routine Cooldown
 - Each routine can only be completed once per day
