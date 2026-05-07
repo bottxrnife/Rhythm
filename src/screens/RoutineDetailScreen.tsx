@@ -22,6 +22,16 @@ export function RoutineDetailScreen() {
   const isFavorite = favoriteRoutineIds.includes(routine.id);
   const completedToday = isRoutineCompletedToday(routine.id);
   const starScale = React.useRef(new Animated.Value(1)).current;
+  const navigatedRef = React.useRef(false);
+
+  const goToCapture = () => {
+    if (navigatedRef.current) return;
+    navigatedRef.current = true;
+    navigation.navigate('Capture', { routine });
+    // Reset the latch after the nav animation so returning to this screen
+    // still allows re-entering Capture on a subsequent tap.
+    setTimeout(() => { navigatedRef.current = false; }, 600);
+  };
 
   const handleToggleFavorite = () => {
     Haptics.selectionAsync();
@@ -113,6 +123,14 @@ export function RoutineDetailScreen() {
             {routine.verifyHint}
           </Text>
         </View>
+
+        {/* Time Limit Info */}
+        <View style={styles.timeLimitInfo}>
+          <MaterialIcons name="timer" size={16} color={colors.outline} />
+          <Text style={[typography.labelSm, { color: colors.onSurfaceVariant, flex: 1 }]}>
+            Clips are up to 30 seconds. You can stop anytime before that.
+          </Text>
+        </View>
       </ScrollView>
 
       {/* Fixed Bottom CTA */}
@@ -131,7 +149,7 @@ export function RoutineDetailScreen() {
         ) : (
           <Button
             label="Start Recording"
-            onPress={() => navigation.navigate('Capture', { routine })}
+            onPress={goToCapture}
           />
         )}
       </LinearGradient>
@@ -219,6 +237,13 @@ const styles = StyleSheet.create({
     padding: 20,
     borderWidth: 1,
     borderColor: 'rgba(196,200,192,0.3)',
+  },
+  timeLimitInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 4,
+    paddingVertical: 4,
   },
   bottomCta: {
     position: 'absolute',

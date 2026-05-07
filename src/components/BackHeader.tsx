@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { colors, typography, spacing } from '../theme';
@@ -13,15 +13,19 @@ export function BackHeader({ title }: Props) {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
+      <Pressable
         onPress={() => navigation.goBack()}
-        style={styles.backBtn}
+        style={({ pressed }) => [styles.backBtn, pressed && styles.pressed]}
         accessibilityLabel="Go back"
+        accessibilityRole="button"
+        hitSlop={8}
       >
         <MaterialIcons name="arrow-back" size={24} color={colors.onSurface} />
-      </TouchableOpacity>
+      </Pressable>
       {title && (
-        <Text style={[typography.headlineLg, styles.title]}>{title}</Text>
+        <Text style={[typography.headlineLg, styles.title]} numberOfLines={1} ellipsizeMode="tail">
+          {title}
+        </Text>
       )}
       <View style={styles.spacer} />
     </View>
@@ -42,6 +46,9 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  pressed: {
+    backgroundColor: colors.surfaceContainerLow,
   },
   title: {
     flex: 1,

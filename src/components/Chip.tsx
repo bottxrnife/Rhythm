@@ -1,5 +1,5 @@
-import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
+import React, { useRef } from 'react';
+import { Pressable, Text, StyleSheet, View, Animated } from 'react-native';
 import { colors, typography, spacing } from '../theme';
 
 type Props = {
@@ -10,20 +10,44 @@ type Props = {
 };
 
 export function Chip({ label, icon, active, onPress }: Props) {
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const onPressIn = () => {
+    Animated.spring(scale, {
+      toValue: 0.97,
+      speed: 36,
+      bounciness: 0,
+      useNativeDriver: true,
+    }).start();
+  };
+  const onPressOut = () => {
+    Animated.spring(scale, {
+      toValue: 1,
+      speed: 28,
+      bounciness: 6,
+      useNativeDriver: true,
+    }).start();
+  };
+
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.7}
-      style={[styles.chip, active && styles.active]}
-      accessibilityRole="button"
-    >
-      <View style={styles.inner}>
-        {icon}
-        <Text style={[typography.bodyMd, styles.text, active && styles.activeText]}>
-          {label}
-        </Text>
-      </View>
-    </TouchableOpacity>
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+        style={[styles.chip, active && styles.active]}
+        accessibilityRole="button"
+        accessibilityState={{ selected: !!active }}
+        accessibilityLabel={label}
+      >
+        <View style={styles.inner}>
+          {icon}
+          <Text style={[typography.bodyMd, styles.text, active && styles.activeText]}>
+            {label}
+          </Text>
+        </View>
+      </Pressable>
+    </Animated.View>
   );
 }
 

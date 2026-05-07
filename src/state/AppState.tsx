@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { isToday, getDayKey } from '../utils/time';
+import { isToday, getDayKey, parseDayKey } from '../utils/time';
 import type { CompletionData } from '../navigation/types';
 
 // ── Types ──
@@ -81,8 +81,8 @@ function computeStreak(completions: CompletionData[]): number {
 
   let streak = 1;
   for (let i = 1; i < sortedDays.length; i++) {
-    const prevDate = new Date(sortedDays[i - 1].split('-').map(Number).join('/'));
-    const currDate = new Date(sortedDays[i].split('-').map(Number).join('/'));
+    const prevDate = parseDayKey(sortedDays[i - 1]);
+    const currDate = parseDayKey(sortedDays[i]);
     const diffMs = prevDate.getTime() - currDate.getTime();
     if (diffMs <= 86400000 * 1.5) {
       streak++;

@@ -75,15 +75,18 @@ export function WelcomeScreen({ navigation }: Props) {
         <View style={styles.actions}>
           {isAvailable ? (
             <Button
-              label={connecting ? 'Connecting...' : 'Sign In with Solana'}
+              label="Sign In with Solana"
               onPress={handleSignIn}
               style={styles.primaryBtn}
+              loading={connecting}
               icon={
-                <MaterialIcons
-                  name="account-balance-wallet"
-                  size={20}
-                  color={colors.onPrimary}
-                />
+                !connecting ? (
+                  <MaterialIcons
+                    name="account-balance-wallet"
+                    size={20}
+                    color={colors.onPrimary}
+                  />
+                ) : undefined
               }
             />
           ) : (

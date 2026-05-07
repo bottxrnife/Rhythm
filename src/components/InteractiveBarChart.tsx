@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { View, Text, LayoutChangeEvent, StyleSheet } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
+import { View, Text, LayoutChangeEvent, StyleSheet, Animated, Easing } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { colors, typography, spacing } from '../theme';
 
@@ -17,6 +17,55 @@ type Props = {
   onScrubStart?: () => void;
   onScrubEnd?: () => void;
 };
+
+// Each bar is rendered full-height; we mask it to the target fraction using
+// a parent with overflow: hidden and animate translateY to "drop" the bar
+// into place. scaleY alone is ambiguous without a reliable transformOrigin
+// across RN versions, so this translateY approach is more portable.
+function AnimatedBar({
+  targetFraction,
+  color,
+  delay,
+  faded,
+}: {
+  targetFraction: number;
+  color: string;
+  delay: number;
+  faded: boolean;
+}) {
+  // 0 = fully hidden (translateY = 100%), 1 = fully visible (translateY = 0)
+  const fraction = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const anim = Animated.timing(fraction, {
+      toValue: targetFraction,
+      duration: 320,
+      delay,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false, // height is not native-driven; scale+height have caveats
+    });
+    anim.start();
+    return () => anim.stop();
+  }, [targetFraction, delay, fraction]);
+
+  const height = fraction.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%', '100%'],
+  });
+
+  return (
+    <Animated.View
+      style={[
+        barStyles.bar,
+        {
+          backgroundColor: color,
+          opacity: faded ? 0.15 : 1,
+          height,
+        },
+      ]}
+    />
+  );
+}
 
 export function InteractiveBarChart({
   data,
@@ -66,9 +115,13 @@ export function InteractiveBarChart({
   };
 
   const selected = selectedIndex !== null ? data[selectedIndex] : null;
+  const accessibilityLabel = `Chart with ${data.length} bars. ` +
+    (selected
+      ? `Selected: ${selected.date}, ${formatDetail ? formatDetail(selected) : selected.value}.`
+      : 'No bar selected.');
 
   return (
-    <View>
+    <View accessibilityRole="adjustable" accessibilityLabel={accessibilityLabel}>
       <View
         style={styles.chart}
         onLayout={onLayout}
@@ -90,18 +143,16 @@ export function InteractiveBarChart({
           const pct = item.value / maxValue;
           const isSelected = selectedIndex === i;
           const isLast = i === data.length - 1;
+          const fraction = Math.max(pct, 0.06); // min 6% so 0 still shows a nub
+          const color = isSelected || isLast ? activeBarColor : barColor;
           return (
             <View key={i} style={styles.barCol} pointerEvents="none">
               <View style={styles.barWrap}>
-                <View
-                  style={[
-                    styles.bar,
-                    {
-                      height: `${Math.max(pct * 100, 6)}%`,
-                      backgroundColor: isSelected || isLast ? activeBarColor : barColor,
-                      opacity: item.value === 0 ? 0.15 : 1,
-                    },
-                  ]}
+                <AnimatedBar
+                  targetFraction={fraction}
+                  color={color}
+                  delay={i * 20}
+                  faded={item.value === 0}
                 />
               </View>
               <Text
@@ -143,7 +194,6 @@ const styles = StyleSheet.create({
   },
   barCol: { flex: 1, alignItems: 'center', gap: 4 },
   barWrap: { flex: 1, justifyContent: 'flex-end', width: '100%' },
-  bar: { width: '100%', borderRadius: 3, minHeight: 3 },
   detail: {
     marginTop: spacing.stackSm,
     paddingTop: spacing.stackSm,
@@ -151,5 +201,13 @@ const styles = StyleSheet.create({
     borderTopColor: colors.outlineVariant,
     alignItems: 'center',
     gap: 2,
+  },
+});
+
+const barStyles = StyleSheet.create({
+  bar: {
+    width: '100%',
+    borderRadius: 3,
+    minHeight: 3,
   },
 });

@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, ScrollView, Linking, Pressable, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, Linking, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRoute, RouteProp } from '@react-navigation/native';
@@ -14,12 +14,6 @@ export function CompletionDetailScreen() {
   const route = useRoute<RouteProp<RootStackParamList, 'CompletionDetail'>>();
   const { completion } = route.params;
 
-  const player = completion.videoUri
-    ? useVideoPlayer(completion.videoUri, (p) => {
-        p.loop = false;
-      })
-    : null;
-
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <BackHeader title="Completion" />
@@ -27,16 +21,9 @@ export function CompletionDetailScreen() {
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
-        {/* Video Playback */}
-        {player ? (
-          <View style={styles.videoWrap}>
-            <VideoView
-              player={player}
-              style={StyleSheet.absoluteFill}
-              nativeControls
-              contentFit="cover"
-            />
-          </View>
+        {/* Video Playback — isolated in a component so we obey Rules of Hooks */}
+        {completion.videoUri ? (
+          <VideoPlayback videoUri={completion.videoUri} />
         ) : (
           <View style={[styles.videoWrap, styles.noVideo]}>
             <MaterialIcons name="videocam-off" size={48} color={colors.outlineVariant} />
@@ -106,6 +93,8 @@ export function CompletionDetailScreen() {
                   )
                 }
                 style={styles.detailRow}
+                accessibilityRole="link"
+                accessibilityLabel={`Open transaction ${completion.txSignature} on Solana Explorer`}
               >
                 <MaterialIcons name="link" size={20} color={colors.primary} />
                 <Text style={[typography.labelSm, { color: colors.onSurfaceVariant, flex: 1 }]}>
@@ -135,6 +124,42 @@ export function CompletionDetailScreen() {
   );
 }
 
+function VideoPlayback({ videoUri }: { videoUri: string }) {
+  const [ready, setReady] = useState(false);
+  const player = useVideoPlayer(videoUri, (p) => {
+    p.loop = false;
+  });
+
+  // expo-video fires statusChange when the player is ready to play.
+  React.useEffect(() => {
+    const sub = player.addListener('statusChange', ({ status }: any) => {
+      if (status === 'readyToPlay' || status === 'loaded') setReady(true);
+    });
+    // Fallback — mark ready after a short delay in case the event never fires.
+    const timeout = setTimeout(() => setReady(true), 1500);
+    return () => {
+      sub?.remove?.();
+      clearTimeout(timeout);
+    };
+  }, [player]);
+
+  return (
+    <View style={styles.videoWrap}>
+      <VideoView
+        player={player}
+        style={StyleSheet.absoluteFill}
+        nativeControls
+        contentFit="cover"
+      />
+      {!ready && (
+        <View style={styles.videoLoadingOverlay}>
+          <ActivityIndicator size="small" color="#fff" />
+        </View>
+      )}
+    </View>
+  );
+}
+
 function DetailRow({
   label,
   value,
@@ -147,7 +172,7 @@ function DetailRow({
   iconColor: string;
 }) {
   return (
-    <View style={styles.detailRow}>
+    <View style={styles.detailRow} accessibilityRole="text" accessibilityLabel={`${label}: ${value}`}>
       <MaterialIcons name={icon} size={20} color={iconColor} />
       <Text style={[typography.labelSm, { color: colors.onSurfaceVariant, flex: 1 }]}>
         {label}
@@ -165,6 +190,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     backgroundColor: '#1a1a1a',
+  },
+  videoLoadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.2)',
   },
   noVideo: {
     alignItems: 'center',

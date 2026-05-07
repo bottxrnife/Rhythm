@@ -1,0 +1,335 @@
+
+Rhythm Verification Server
+  Model:    us.amazon.nova-2-lite-v1:0
+  Region:   us-east-1
+  Port:     3001
+  Encode:   15fps @ 480px long-edge, preset=ultrafast, crf=30, max 12s
+  ffmpeg:   ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers
+  Log file: /Users/williamliu/Documents/GitHub/Rhythm/backend/server.log
+
+  Nova 2 Lite: connected
+
+  Listening on http://0.0.0.0:3001/verify
+  Tail logs with: tail -f /Users/williamliu/Documents/GitHub/Rhythm/backend/server.log
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+▶ 18:04:19 POST /verify  id=9eb36815
+  routine: hydrate
+  sponsor: Liquid Death
+  wallet:  LogTest...
+  location: (none)
+  payload: 2.00 MB base64, read in 2ms
+  video:   1.50 MB decoded (1,570,024 bytes)
+  Calling Nova 2 Lite (us.amazon.nova-2-lite-v1:0)...
+  Encode: input  480x270 · 30.0fps · 30.5s · h264 · 411kbps (1.50 MB)
+  Encode: output 480x270 · 15.0fps · 12.0s · h264 · 116kbps (170.8 KB, 11.1% of input) in 53ms
+
+  ── Nova raw response ──
+  stopReason:  end_turn
+  tokens:      in=2443  out=91  total=2534
+  bedrock latencyMs: 1315
+  judgment (parsed from Nova output):
+    {
+      "verified": false,
+      "confidence": 0.0,
+      "product_visible": false,
+      "product_in_use": false,
+      "routine_completed": false,
+      "appears_genuine": false,
+      "reason": "The video shows a rotating Earth at night with no visible person, product, or hydration activity.",
+      "short_reason": "no person or product visible"
+    }
+
+  ── Policy ──
+  sponsored:   True   confidence: 0.00   verified(model): False
+  × Confidence 0.00 below 0.70
+  × Sponsor product not visible
+  × Product not actively used
+  × Routine not completed
+  × Capture does not appear genuine
+
+  ── Timing breakdown ──
+  encode:          106 ms
+  bedrock:        2800 ms
+  read+parse:        2 ms
+  other:             4 ms
+  total:          2912 ms
+
+  ✗ NOT VERIFIED — no person or product visible (confidence 0.00)
+  model reason: The video shows a rotating Earth at night with no visible person, product, or hydration activity.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+▶ 18:05:27 POST /verify  id=98771e85
+  routine: hydrate
+  sponsor: Liquid Death
+  location: (none)
+  payload: 17.24 MB base64, read in 9346ms
+  video:   12.93 MB decoded (13,560,070 bytes)
+  Calling Nova 2 Lite (us.amazon.nova-2-lite-v1:0)...
+  Encode: input  1920x1080 · 29.9fps · 6.0s · h264 · 18131kbps (12.93 MB)
+  Encode: output 270x480 · 15.0fps · 6.0s · h264 · 506kbps (370.8 KB, 2.8% of input) in 199ms
+
+  ── Nova raw response ──
+  stopReason:  end_turn
+  tokens:      in=1923  out=81  total=2004
+  bedrock latencyMs: 1063
+  judgment (parsed from Nova output):
+    {
+      "verified": false,
+      "confidence": 0.3,
+      "product_visible": true,
+      "product_in_use": false,
+      "routine_completed": false,
+      "appears_genuine": true,
+      "reason": "The product is visible but not being actively used on camera.",
+      "short_reason": "no drinking motion seen"
+    }
+
+  ── Policy ──
+  sponsored:   True   confidence: 0.30   verified(model): False
+  × Confidence 0.30 below 0.70
+  × Product not actively used
+  × Routine not completed
+
+  ── Timing breakdown ──
+  encode:          263 ms
+  bedrock:        2250 ms
+  read+parse:     9346 ms
+  other:            25 ms
+  total:         11884 ms
+
+  ✗ NOT VERIFIED — no drinking motion seen (confidence 0.30)
+  model reason: The product is visible but not being actively used on camera.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+▶ 18:06:20 POST /verify  id=717eb16a
+  routine: plug-in-phone
+  sponsor: none (unsponsored)
+  location: (none)
+  payload: 29.01 MB base64, read in 8747ms
+  video:   21.76 MB decoded (22,811,884 bytes)
+  Calling Nova 2 Lite (us.amazon.nova-2-lite-v1:0)...
+  Encode: input  1920x1080 · 29.9fps · 8.6s · h264 · 21162kbps (21.76 MB)
+  Encode: output 270x480 · 15.0fps · 8.6s · h264 · 269kbps (283.1 KB, 1.3% of input) in 281ms
+
+  ── Nova raw response ──
+  stopReason:  end_turn
+  tokens:      in=1917  out=98  total=2015
+  bedrock latencyMs: 2194
+  judgment (parsed from Nova output):
+    {
+      "verified": false,
+      "confidence": 0.3,
+      "product_visible": true,
+      "product_in_use": true,
+      "routine_completed": false,
+      "appears_genuine": true,
+      "reason": "The video only shows the insertion of a charging cable, but does not show the phone being plugged in or the charging process.",
+      "short_reason": "no phone visible or charging shown"
+    }
+
+  ── Policy ──
+  sponsored:   False   confidence: 0.30   verified(model): False
+  × Confidence 0.30 below 0.70
+  × Routine not completed
+
+  ── Timing breakdown ──
+  encode:          343 ms
+  bedrock:        2861 ms
+  read+parse:     8747 ms
+  other:            39 ms
+  total:         11990 ms
+
+  ✗ NOT VERIFIED — no phone visible or charging shown (confidence 0.30)
+  model reason: The video only shows the insertion of a charging cable, but does not show the phone being plugged in or the charging process.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+▶ 18:07:43 POST /verify  id=5e9b9013
+  routine: plug-in-phone
+  sponsor: none (unsponsored)
+  location: (none)
+  payload: 31.42 MB base64, read in 27507ms
+  video:   23.57 MB decoded (24,712,781 bytes)
+  Calling Nova 2 Lite (us.amazon.nova-2-lite-v1:0)...
+  Encode: input  1920x1080 · 29.9fps · 10.0s · h264 · 19782kbps (23.57 MB)
+  Encode: output 270x480 · 15.0fps · 10.0s · h264 · 354kbps (432.8 KB, 1.8% of input) in 325ms
+
+  ── Nova raw response ──
+  stopReason:  end_turn
+  tokens:      in=2177  out=81  total=2258
+  bedrock latencyMs: 2018
+  judgment (parsed from Nova output):
+    {
+      "verified": true,
+      "confidence": 0.9,
+      "product_visible": true,
+      "product_in_use": true,
+      "routine_completed": true,
+      "appears_genuine": true,
+      "reason": "The video clearly shows the action of plugging in a phone.",
+      "short_reason": "routine verified"
+    }
+
+  ── Policy ──
+  sponsored:   False   confidence: 0.90   verified(model): True
+  ✓ all policy checks passed
+
+  ── Timing breakdown ──
+  encode:          386 ms
+  bedrock:        3252 ms
+  read+parse:    27507 ms
+  other:            45 ms
+  total:         31190 ms
+
+  ✓ VERIFIED — routine verified (confidence 0.90)
+  x402 payment_id: x402_30db2bf3a5b2a40e_1778144895
+
+Rhythm Verification Server
+  Model:    us.amazon.nova-2-lite-v1:0
+  Region:   us-east-1
+  Port:     3001
+  Encode:   15fps @ 480px long-edge, preset=ultrafast, crf=30, max 30s
+  ffmpeg:   ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers
+  Log file: /Users/williamliu/Documents/GitHub/Rhythm/backend/server.log
+
+  Nova 2 Lite: connected
+
+  Listening on http://0.0.0.0:3001/verify
+  Tail logs with: tail -f /Users/williamliu/Documents/GitHub/Rhythm/backend/server.log
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+▶ 18:16:58 POST /verify  id=36006a1b
+  routine: hydrate
+  sponsor: Liquid Death
+  location: (none)
+  payload: 3.70 MB base64, read in 802ms
+  video:   2.77 MB decoded (2,906,191 bytes)
+  Calling Nova 2 Lite (us.amazon.nova-2-lite-v1:0)...
+  Encode: input  1920x1080 · 29.9fps · 1.5s · h264 · 15748kbps (2.77 MB)
+  Encode: output 270x480 · 15.0fps · 1.5s · h264 · 400kbps (71.8 KB, 2.5% of input) in 85ms
+
+  ── Nova raw response ──
+  stopReason:  end_turn
+  tokens:      in=1923  out=92  total=2015
+  bedrock latencyMs: 1007
+  judgment (parsed from Nova output):
+    {
+      "verified": false,
+      "confidence": 0,
+      "product_visible": false,
+      "product_in_use": false,
+      "routine_completed": false,
+      "appears_genuine": false,
+      "reason": "The video only shows a close-up of a keyboard and does not depict any hydration activity or the Liquid Death product.",
+      "short_reason": "no hydration activity shown"
+    }
+
+  ── Policy ──
+  sponsored:   True   confidence: 0.00   verified(model): False
+  × Confidence 0.00 below 0.70
+  × Sponsor product not visible
+  × Product not actively used
+  × Routine not completed
+  × Capture does not appear genuine
+
+  ── Timing breakdown ──
+  encode:          143 ms
+  bedrock:        1692 ms
+  read+parse:      802 ms
+  other:             8 ms
+  total:          2645 ms
+
+  ✗ NOT VERIFIED — no hydration activity shown (confidence 0.00)
+  model reason: The video only shows a close-up of a keyboard and does not depict any hydration activity or the Liquid Death product.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+▶ 18:17:32 POST /verify  id=f21788b8
+  routine: hydrate
+  sponsor: Liquid Death
+  location: (none)
+  payload: 18.68 MB base64, read in 12340ms
+  video:   14.01 MB decoded (14,687,722 bytes)
+  Calling Nova 2 Lite (us.amazon.nova-2-lite-v1:0)...
+  Encode: input  1920x1080 · 29.9fps · 5.5s · h264 · 21177kbps (14.01 MB)
+  Encode: output 270x480 · 15.0fps · 5.5s · h264 · 165kbps (112.1 KB, 0.8% of input) in 272ms
+
+  ── Nova raw response ──
+  stopReason:  end_turn
+  tokens:      in=1923  out=99  total=2022
+  bedrock latencyMs: 959
+  judgment (parsed from Nova output):
+    {
+      "verified": false,
+      "confidence": 0.2,
+      "product_visible": false,
+      "product_in_use": false,
+      "routine_completed": false,
+      "appears_genuine": false,
+      "reason": "The video is too dark to identify any products or actions clearly, and the expected sponsor product (Liquid Death) is not visible.",
+      "short_reason": "video too dark to see action"
+    }
+
+  ── Policy ──
+  sponsored:   True   confidence: 0.20   verified(model): False
+  × Confidence 0.20 below 0.70
+  × Sponsor product not visible
+  × Product not actively used
+  × Routine not completed
+  × Capture does not appear genuine
+
+  ── Timing breakdown ──
+  encode:          345 ms
+  bedrock:        1479 ms
+  read+parse:    12340 ms
+  other:            29 ms
+  total:         14193 ms
+
+  ✗ NOT VERIFIED — video too dark to see action (confidence 0.20)
+  model reason: The video is too dark to identify any products or actions clearly, and the expected sponsor product (Liquid Death) is not visible.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+▶ 18:19:41 POST /verify  id=8055327e
+  routine: brush-teeth
+  sponsor: Colgate
+  location: (none)
+  payload: 11.99 MB base64, read in 5964ms
+  video:   8.99 MB decoded (9,426,871 bytes)
+  Calling Nova 2 Lite (us.amazon.nova-2-lite-v1:0)...
+  Encode: input  1920x1080 · 29.9fps · 4.2s · h264 · 17907kbps (8.99 MB)
+  Encode: output 270x480 · 15.0fps · 4.2s · h264 · 831kbps (426.5 KB, 4.6% of input) in 170ms
+
+  ── Nova raw response ──
+  stopReason:  end_turn
+  tokens:      in=2019  out=92  total=2111
+  bedrock latencyMs: 2414
+  judgment (parsed from Nova output):
+    {
+      "verified": false,
+      "confidence": 0.1,
+      "product_visible": false,
+      "product_in_use": false,
+      "routine_completed": false,
+      "appears_genuine": false,
+      "reason": "The video shows a laptop screen with code, not a person brushing teeth or any Colgate product.",
+      "short_reason": "no person or product visible"
+    }
+
+  ── Policy ──
+  sponsored:   True   confidence: 0.10   verified(model): False
+  × Confidence 0.10 below 0.70
+  × Sponsor product not visible
+  × Product not actively used
+  × Routine not completed
+  × Capture does not appear genuine
+
+  ── Timing breakdown ──
+  encode:          235 ms
+  bedrock:        3522 ms
+  read+parse:     5964 ms
+  other:            17 ms
+  total:          9738 ms
+
+  ✗ NOT VERIFIED — no person or product visible (confidence 0.10)
+  model reason: The video shows a laptop screen with code, not a person brushing teeth or any Colgate product.
