@@ -32,7 +32,7 @@ export type RootStackParamList = {
   Capture: { routine: RoutineData };
   Verifying: { routine: RoutineData; videoUri?: string; location?: { latitude: number; longitude: number } };
   Verified: { routine: RoutineData; credits: string; videoUri?: string; location?: { latitude: number; longitude: number } };
-  Almost: { routine: RoutineData; videoUri?: string };
+  Almost: { routine: RoutineData; videoUri?: string; shortReason?: string };
   CompletionDetail: { completion: CompletionData };
   Sponsors: undefined;
   Settings: undefined;

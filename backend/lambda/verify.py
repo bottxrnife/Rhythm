@@ -41,10 +41,20 @@ VERIFICATION_SCHEMA = {
         "product_in_use": {"type": "boolean"},
         "routine_completed": {"type": "boolean"},
         "appears_genuine": {"type": "boolean"},
-        "reason": {"type": "string"}
+        "reason": {"type": "string"},
+        "short_reason": {
+            "type": "string",
+            "description": (
+                "A very brief 3-8 word phrase describing the single most important "
+                "reason the routine could not be verified, written in lowercase. "
+                "Examples: 'could not detect cup', 'no person visible', "
+                "'pill not swallowed on camera', 'product label unreadable', "
+                "'video too dark'. If verified=true, return 'routine verified'."
+            )
+        }
     },
     "required": ["verified", "confidence", "product_visible", "product_in_use",
-                  "routine_completed", "appears_genuine", "reason"]
+                  "routine_completed", "appears_genuine", "reason", "short_reason"]
 }
 
 
@@ -113,6 +123,16 @@ def handler(event, context):
                 f'3. Is the routine ({routine_id}) performed from start to finish?\n'
                 f'4. Does this appear to be a genuine, real-time capture — not a replay of '
                 f'a screen, a photo of a photo, or a pre-recorded clip?\n\n'
+                f'For the "short_reason" field, write a 3-8 word lowercase phrase that '
+                f'names the single most important reason the routine could not be verified '
+                f'from this specific video (what was missing, unclear, or wrong). '
+                f'Be concrete and observation-based — name the object, action, or person '
+                f'that was missing or unclear. '
+                f'Good examples: "could not detect cup", "no drinking motion seen", '
+                f'"pill not swallowed on camera", "toothbrush not visible", '
+                f'"no person in frame", "video too dark to see action", '
+                f'"product label not readable", "routine cut off before finishing". '
+                f'If the routine IS verified, set short_reason to "routine verified".\n\n'
                 f'Extract information in JSON format according to the given schema.\n\n'
                 f'JSON Schema:\n{json.dumps(VERIFICATION_SCHEMA, indent=2)}'
             ),
@@ -123,7 +143,7 @@ def handler(event, context):
             modelId=MODEL_ID,
             messages=[{'role': 'user', 'content': content}],
             inferenceConfig={
-                'maxTokens': 300,
+                'maxTokens': 400,
                 'temperature': 0,
             },
         )
@@ -141,6 +161,7 @@ def handler(event, context):
                 'product_visible': False, 'product_in_use': False,
                 'routine_completed': False, 'appears_genuine': False,
                 'reason': 'Could not parse model response',
+                'short_reason': 'verification failed',
             }
 
         # ── Agent 3: Policy ──
@@ -169,10 +190,36 @@ def handler(event, context):
         if policy_passed:
             payment_id = f'x402_{bundle_hash}_{int(time.time())}'
 
+        # Derive short_reason shown to the user
+        if policy_passed:
+            short_reason = 'routine verified'
+        else:
+            short_reason = (judgment.get('short_reason') or '').strip().lower()
+            if not short_reason or short_reason == 'routine verified':
+                if issues:
+                    first = issues[0].lower()
+                    if 'confidence' in first:
+                        short_reason = 'not confident enough'
+                    elif 'product not visible' in first or 'sponsor product not visible' in first:
+                        short_reason = 'sponsor product not visible'
+                    elif 'product not actively used' in first:
+                        short_reason = 'product not actively used'
+                    elif 'routine not completed' in first:
+                        short_reason = 'routine not completed on camera'
+                    elif 'genuine' in first:
+                        short_reason = 'capture not genuine'
+                    elif 'location' in first:
+                        short_reason = 'location required for medication'
+                    else:
+                        short_reason = first[:60]
+                else:
+                    short_reason = 'could not verify routine'
+
         return resp(200, {
             'verified': policy_passed,
             'confidence': judgment.get('confidence', 0.0),
             'reason': judgment.get('reason', ''),
+            'short_reason': short_reason,
             'product_visible': judgment.get('product_visible', False),
             'product_in_use': judgment.get('product_in_use', False),
             'routine_completed': judgment.get('routine_completed', False),

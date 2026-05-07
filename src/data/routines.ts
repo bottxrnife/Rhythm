@@ -9,7 +9,7 @@ export const ROUTINES: RoutineData[] = [
     category: 'Hygiene',
     credits: '+2.50',
     steps: [
-      'Start recording.',
+      'Start recording — clips are up to 30 seconds.',
       'Show the Liquid Death can or bottle clearly to the camera.',
       'Open it on camera so the seal break is visible.',
       'Drink from it while recording.',
@@ -27,7 +27,7 @@ export const ROUTINES: RoutineData[] = [
     category: 'Hygiene',
     credits: '+3.00',
     steps: [
-      'Start recording.',
+      'Start recording — clips are up to 30 seconds.',
       'Show the Colgate tube label clearly to the camera.',
       'Squeeze toothpaste onto your brush on camera.',
       'Brush your teeth for at least 30 seconds while recording.',
@@ -44,7 +44,7 @@ export const ROUTINES: RoutineData[] = [
     category: 'Pets',
     credits: '+5.00',
     steps: [
-      'Start recording.',
+      'Start recording — clips are up to 30 seconds.',
       'Show the Purina bag or can label clearly to the camera.',
       'Pour or scoop the food into the bowl on camera.',
       'Place the bowl down for your pet while recording.',
@@ -61,7 +61,7 @@ export const ROUTINES: RoutineData[] = [
     category: 'Cleaning',
     credits: '+2.00',
     steps: [
-      'Start recording.',
+      'Start recording — clips are up to 30 seconds.',
       'Show the Clorox wipes container label clearly to the camera.',
       'Pull a wipe out of the container on camera.',
       'Wipe down the counter surface while recording.',
@@ -78,7 +78,7 @@ export const ROUTINES: RoutineData[] = [
     category: 'Eating',
     credits: '+4.00',
     steps: [
-      'Start recording.',
+      'Start recording — clips are up to 30 seconds.',
       'Show the HelloFresh box or meal kit label clearly to the camera.',
       'Open the kit and begin preparing ingredients on camera.',
       'Show the plated result while recording.',
@@ -95,7 +95,7 @@ export const ROUTINES: RoutineData[] = [
     category: 'Cleaning',
     credits: '+3.50',
     steps: [
-      'Start recording.',
+      'Start recording — clips are up to 30 seconds.',
       'Show the Tide pod bag or bottle label clearly to the camera.',
       'Drop the pod in or pour detergent into the machine on camera.',
       'Close the door and start the cycle while recording.',
@@ -112,7 +112,7 @@ export const ROUTINES: RoutineData[] = [
     category: 'Hygiene',
     credits: '+3.00',
     steps: [
-      'Start recording.',
+      'Start recording — clips are up to 30 seconds.',
       'Show the Dove body wash bottle label clearly to the camera.',
       'Squeeze product onto your hand or washcloth on camera.',
       'Show yourself lathering while recording.',
@@ -129,7 +129,7 @@ export const ROUTINES: RoutineData[] = [
     category: 'Self-Care',
     credits: '+2.50',
     steps: [
-      'Start recording.',
+      'Start recording — clips are up to 30 seconds.',
       'Show the messy area to the camera first.',
       'Pick up and put away at least five items while recording.',
       'Pan the camera across the tidied area to show the difference.',
@@ -145,7 +145,7 @@ export const ROUTINES: RoutineData[] = [
     category: 'Medication',
     credits: '+6.00',
     steps: [
-      'Start recording.',
+      'Start recording — clips are up to 30 seconds.',
       'Show the Lipitor prescription bottle label clearly to the camera.',
       'Open the bottle and shake one pill into your hand on camera.',
       'Put the pill in your mouth and take a sip of water while recording.',
@@ -162,7 +162,7 @@ export const ROUTINES: RoutineData[] = [
     category: 'Medication',
     credits: '+6.00',
     steps: [
-      'Start recording.',
+      'Start recording — clips are up to 30 seconds.',
       'Show the Glucophage or metformin bottle label clearly to the camera.',
       'Open the bottle and take out the correct dose on camera.',
       'Take the medication with water while recording.',
@@ -179,7 +179,7 @@ export const ROUTINES: RoutineData[] = [
     category: 'Medication',
     credits: '+6.00',
     steps: [
-      'Start recording.',
+      'Start recording — clips are up to 30 seconds.',
       'Show the Losartan or lisinopril bottle label clearly to the camera.',
       'Open the bottle and take out one pill on camera.',
       'Take the pill with water while recording.',
@@ -196,7 +196,7 @@ export const ROUTINES: RoutineData[] = [
     category: 'Medication',
     credits: '+4.00',
     steps: [
-      'Start recording.',
+      'Start recording — clips are up to 30 seconds.',
       'Show the prescription tube or bottle label clearly to the camera.',
       'Squeeze or dispense the product onto your finger on camera.',
       'Apply it to the affected area while recording.',
@@ -213,7 +213,7 @@ export const ROUTINES: RoutineData[] = [
     category: 'Medication',
     credits: '+5.00',
     steps: [
-      'Start recording.',
+      'Start recording — clips are up to 30 seconds.',
       'Show the inhaler label clearly to the camera.',
       'Shake the inhaler on camera.',
       'Use the inhaler while recording — one puff, hold, exhale.',
@@ -230,7 +230,7 @@ export const ROUTINES: RoutineData[] = [
     category: 'Medication',
     credits: '+4.00',
     steps: [
-      'Start recording.',
+      'Start recording — clips are up to 30 seconds.',
       'Show the glucose meter and test strip brand to the camera.',
       'Insert the strip, prick your finger, and apply blood on camera.',
       'Show the reading on the meter screen while recording.',
@@ -248,7 +248,7 @@ export const ROUTINES: RoutineData[] = [
     category: 'Testing',
     credits: '+1.00',
     steps: [
-      'Start recording.',
+      'Start recording — clips are up to 30 seconds.',
       'Show the water bottle to the camera.',
       'Open or uncap the bottle on camera.',
       'Take a drink while recording.',
@@ -264,7 +264,7 @@ export const ROUTINES: RoutineData[] = [
     category: 'Testing',
     credits: '+1.00',
     steps: [
-      'Start recording.',
+      'Start recording — clips are up to 30 seconds.',
       'Show a glass or cup of water to the camera.',
       'Bring it to your lips and drink while recording.',
     ],
@@ -279,7 +279,7 @@ export const ROUTINES: RoutineData[] = [
     category: 'Testing',
     credits: '+1.00',
     steps: [
-      'Start recording.',
+      'Start recording — clips are up to 30 seconds.',
       'Show the charging cable and your phone.',
       'Plug the cable into the phone on camera.',
       'Show the charging indicator on screen.',
@@ -295,7 +295,7 @@ export const ROUTINES: RoutineData[] = [
     category: 'Testing',
     credits: '+1.00',
     steps: [
-      'Start recording.',
+      'Start recording — clips are up to 30 seconds.',
       'Turn on the faucet.',
       'Apply soap and lather your hands on camera.',
       'Rinse and dry while recording.',
@@ -311,7 +311,7 @@ export const ROUTINES: RoutineData[] = [
     category: 'Testing',
     credits: '+1.00',
     steps: [
-      'Start recording.',
+      'Start recording — clips are up to 30 seconds.',
       'Show the unmade bed.',
       'Pull up the sheets and arrange pillows on camera.',
       'Show the finished made bed.',
@@ -327,7 +327,7 @@ export const ROUTINES: RoutineData[] = [
     category: 'Testing',
     credits: '+1.00',
     steps: [
-      'Start recording.',
+      'Start recording — clips are up to 30 seconds.',
       'Show the vitamin bottle or packet.',
       'Take out a vitamin on camera.',
       'Put it in your mouth and swallow with water.',

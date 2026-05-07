@@ -46,10 +46,27 @@ describe('time utilities', () => {
       expect(getDayKey(day1)).not.toBe(getDayKey(day2));
     });
 
-    it('returns expected format', () => {
-      const ts = new Date(2026, 4, 3).getTime(); // May 3, 2026
+    it('returns ISO-style zero-padded format (YYYY-MM-DD)', () => {
+      const ts = new Date(2026, 4, 3).getTime(); // May 3, 2026 (month 4 = May 0-indexed)
       const key = getDayKey(ts);
-      expect(key).toBe('2026-4-3');
+      expect(key).toBe('2026-05-03');
+    });
+
+    it('parses back to the same date with parseDayKey', () => {
+      const { parseDayKey } = require('../time');
+      const ts = new Date(2026, 11, 31).getTime(); // Dec 31
+      const key = getDayKey(ts);
+      const parsed = parseDayKey(key);
+      expect(parsed.getFullYear()).toBe(2026);
+      expect(parsed.getMonth()).toBe(11);
+      expect(parsed.getDate()).toBe(31);
+    });
+
+    it('keeps a month boundary intact (Dec 31 vs Jan 1)', () => {
+      const dec31 = getDayKey(new Date(2026, 11, 31).getTime());
+      const jan1 = getDayKey(new Date(2027, 0, 1).getTime());
+      // These must sort so dec31 < jan1 for the streak calc to work correctly
+      expect([dec31, jan1].sort()).toEqual([dec31, jan1]);
     });
   });
 

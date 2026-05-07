@@ -1,13 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, ActivityIndicator, StyleSheet, Animated, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Button } from '../components';
 import { useSafeWallet } from '../services/wallet';
 import { verifyRoutine } from '../services/verification';
 import { colors, typography, spacing } from '../theme';
 import type { RootStackParamList } from '../navigation/types';
+
+// Hard cap — after this, we show the user a retry/cancel UI instead of spinning forever.
+const VERIFICATION_TIMEOUT_MS = 45000;
 
 export function VerifyingScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -16,12 +21,45 @@ export function VerifyingScreen() {
   const location = route.params.location;
   const { account } = useSafeWallet();
   const [step, setStep] = useState(0); // 0=capture, 1=verify, 2=policy, 3=payout
+  const [status, setStatus] = useState<'running' | 'timedOut'>('running');
+  const [runToken, setRunToken] = useState(0); // bump to re-trigger verification
+  const pulse = useRef(new Animated.Value(0)).current;
+
+  // Gentle breathing pulse on the spinner icon — subtle, native-driven.
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, {
+          toValue: 1,
+          duration: 1200,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulse, {
+          toValue: 0,
+          duration: 1200,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [pulse]);
 
   useEffect(() => {
     let cancelled = false;
+    let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
 
     const run = async () => {
       setStep(1); // Verification agent
+      setStatus('running');
+
+      timeoutHandle = setTimeout(() => {
+        if (cancelled) return;
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
+        setStatus('timedOut');
+      }, VERIFICATION_TIMEOUT_MS);
 
       try {
         const result = await verifyRoutine({
@@ -33,47 +71,101 @@ export function VerifyingScreen() {
         });
 
         if (cancelled) return;
+        if (timeoutHandle) { clearTimeout(timeoutHandle); timeoutHandle = null; }
+
         setStep(2); // Policy agent
-        await new Promise((r) => setTimeout(r, 400));
+        await new Promise((r) => setTimeout(r, 300));
         if (cancelled) return;
         setStep(3); // Payout agent
-        await new Promise((r) => setTimeout(r, 400));
+        await new Promise((r) => setTimeout(r, 300));
         if (cancelled) return;
 
         if (result.verified) {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
           navigation.replace('Verified', { routine, credits: routine.credits, videoUri, location });
         } else {
-          navigation.replace('Almost', { routine, videoUri });
+          navigation.replace('Almost', { routine, videoUri, shortReason: result.shortReason });
         }
       } catch (e: any) {
         if (cancelled) return;
-        // API not configured or network error — go to Almost screen
+        if (timeoutHandle) { clearTimeout(timeoutHandle); timeoutHandle = null; }
         console.warn('Verification error:', e?.message);
-        navigation.replace('Almost', { routine, videoUri });
+        navigation.replace('Almost', {
+          routine,
+          videoUri,
+          shortReason: 'could not reach verification server',
+        });
       }
     };
 
     run();
-    return () => { cancelled = true; };
-  }, []);
+    return () => {
+      cancelled = true;
+      if (timeoutHandle) clearTimeout(timeoutHandle);
+    };
+  // Re-run whenever runToken bumps (from retry button).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [runToken]);
+
+  const retry = () => setRunToken((t) => t + 1);
+  const cancel = () => {
+    navigation.replace('Almost', {
+      routine,
+      videoUri,
+      shortReason: 'verification took too long',
+    });
+  };
+
+  if (status === 'timedOut') {
+    return (
+      <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+        <View style={styles.container}>
+          <View style={[styles.iconWrap, { borderColor: colors.error }]}>
+            <MaterialIcons name="hourglass-empty" size={48} color={colors.error} />
+          </View>
+          <View style={styles.textBlock}>
+            <Text style={[typography.headlineLg, { color: colors.onSurface, textAlign: 'center' }]}>
+              This is taking longer than expected.
+            </Text>
+            <Text style={[typography.bodyMd, { color: colors.onSurfaceVariant, textAlign: 'center' }]}>
+              The verification server may be slow right now. You can try again in a moment, or go back and review your capture.
+            </Text>
+          </View>
+          <View style={styles.retryActions}>
+            <Button
+              label="Try again"
+              onPress={retry}
+              icon={<MaterialIcons name="refresh" size={18} color={colors.onPrimary} />}
+            />
+            <Button label="Go back" variant="secondary" onPress={cancel} />
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const pulseScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.08] });
+  const pulseOpacity = pulse.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] });
 
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <View style={styles.container}>
-        <View style={styles.iconWrap}>
+        <Animated.View
+          style={[styles.iconWrap, { transform: [{ scale: pulseScale }], opacity: pulseOpacity }]}
+        >
           <MaterialIcons name="auto-awesome" size={48} color={colors.primary} />
-        </View>
+        </Animated.View>
 
         <View style={styles.textBlock}>
-          <Text style={[typography.headlineLg, { color: colors.onSurface }]}>
+          <Text style={[typography.headlineLg, { color: colors.onSurface, textAlign: 'center' }]}>
             Verifying your routine...
           </Text>
           <Text style={[typography.bodyMd, { color: colors.onSurfaceVariant, textAlign: 'center' }]}>
-            Amazon Nova 2 Lite, our AI verification model, is reviewing your capture for "{routine.title}". This usually takes just a moment.
+            Amazon Nova 2 Lite is reviewing your capture for "{routine.title}". This usually takes just a moment.
           </Text>
         </View>
 
-        <ActivityIndicator size="large" color={colors.primary} style={styles.spinner} />
+        <ActivityIndicator size="small" color={colors.primary} style={styles.spinner} />
 
         <View style={styles.steps}>
           <StepIndicator label="Capture agent" done={step >= 1} />
@@ -88,7 +180,7 @@ export function VerifyingScreen() {
 
 function StepIndicator({ label, done, active }: { label: string; done?: boolean; active?: boolean }) {
   return (
-    <View style={stepStyles.row}>
+    <View style={stepStyles.row} accessibilityRole="text">
       <View style={[stepStyles.dot, done && stepStyles.dotDone, active && stepStyles.dotActive]}>
         {done && <MaterialIcons name="check" size={12} color={colors.onPrimary} />}
       </View>
@@ -128,14 +220,20 @@ const styles = StyleSheet.create({
   textBlock: {
     alignItems: 'center',
     gap: spacing.stackSm,
-    maxWidth: 280,
+    maxWidth: 320,
   },
   spinner: {
-    marginVertical: spacing.stackMd,
+    marginVertical: spacing.stackSm,
   },
   steps: {
     gap: spacing.stackMd,
     alignItems: 'flex-start',
+  },
+  retryActions: {
+    width: '100%',
+    maxWidth: 320,
+    gap: spacing.stackSm,
+    marginTop: spacing.stackMd,
   },
 });
 

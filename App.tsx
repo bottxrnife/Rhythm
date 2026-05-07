@@ -3,7 +3,6 @@ import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { MobileWalletProvider } from '@wallet-ui/react-native-web3js';
-import { clusterApiUrl } from '@solana/web3.js';
 import {
   useFonts,
   PlusJakartaSans_400Regular,
@@ -16,9 +15,8 @@ import { RootNavigator } from './src/navigation';
 import { AppStateProvider } from './src/state/AppState';
 import { ErrorBoundary } from './src/components';
 import { colors } from './src/theme';
+import { SOLANA_WALLET_CHAIN, SOLANA_RPC_URL } from './src/config/solana';
 
-const SOLANA_CHAIN = 'solana:devnet';
-const SOLANA_ENDPOINT = clusterApiUrl('devnet');
 const APP_IDENTITY = {
   name: 'Rhythm',
   uri: 'https://rhythm.app',
@@ -44,8 +42,8 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <MobileWalletProvider
-        chain={SOLANA_CHAIN}
-        endpoint={SOLANA_ENDPOINT}
+        chain={SOLANA_WALLET_CHAIN}
+        endpoint={SOLANA_RPC_URL}
         identity={APP_IDENTITY}
       >
         <AppStateProvider>

@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { useNavigation, useRoute, RouteProp, CommonActions } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button } from '../components';
@@ -19,6 +20,48 @@ export function VerifiedScreen() {
   const { addCompletion } = useAppState();
   const [txSignature, setTxSignature] = useState<string | undefined>();
   const [txError, setTxError] = useState<string | undefined>();
+
+  // Celebration animations — checkmark pop in and reward card fade up.
+  const checkScale = useRef(new Animated.Value(0.4)).current;
+  const checkOpacity = useRef(new Animated.Value(0)).current;
+  const rewardTranslateY = useRef(new Animated.Value(20)).current;
+  const rewardOpacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Fire a success haptic on mount
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+
+    Animated.sequence([
+      Animated.parallel([
+        Animated.spring(checkScale, {
+          toValue: 1,
+          tension: 180,
+          friction: 7,
+          useNativeDriver: true,
+        }),
+        Animated.timing(checkOpacity, {
+          toValue: 1,
+          duration: 240,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.parallel([
+        Animated.timing(rewardTranslateY, {
+          toValue: 0,
+          duration: 320,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(rewardOpacity, {
+          toValue: 1,
+          duration: 320,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start();
+  }, [checkScale, checkOpacity, rewardTranslateY, rewardOpacity]);
 
   useEffect(() => {
     let cancelled = false;
@@ -52,8 +95,9 @@ export function VerifiedScreen() {
             identity: APP_IDENTITY,
           });
 
-          // Decode address — MWA may return base64
-          let userPubkey: PublicKey;
+          // Decode address — MWA may return base64. `PublicKey` comes from a
+          // `require()` above, so its *type* isn't directly accessible; use any.
+          let userPubkey: any;
           try {
             userPubkey = new PublicKey(auth.accounts[0].address);
           } catch {
@@ -136,28 +180,39 @@ export function VerifiedScreen() {
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <View style={styles.container}>
         {/* Checkmark */}
-        <View style={styles.checkCircle}>
+        <Animated.View
+          style={[
+            styles.checkCircle,
+            { transform: [{ scale: checkScale }], opacity: checkOpacity },
+          ]}
+        >
           <View style={styles.checkInner} />
           <MaterialIcons name="check-circle" size={64} color={colors.primary} />
-        </View>
+        </Animated.View>
 
         {/* Text */}
-        <View style={styles.textBlock}>
+        <Animated.View style={[styles.textBlock, { opacity: rewardOpacity }]}>
           <Text style={[typography.display, { color: colors.onSurface }]}>Well done.</Text>
           <Text style={[typography.headlineMd, { color: colors.onSurfaceVariant }]}>
             Routine verified.
           </Text>
-        </View>
+        </Animated.View>
 
         {/* Reward Card */}
-        <View style={[styles.rewardCard, shadows.soft]}>
+        <Animated.View
+          style={[
+            styles.rewardCard,
+            shadows.soft,
+            { opacity: rewardOpacity, transform: [{ translateY: rewardTranslateY }] },
+          ]}
+        >
           <MaterialIcons name="stars" size={32} color={colors.tertiary} />
           <View style={styles.rewardRow}>
             <Text style={[typography.display, { color: colors.tertiary }]}>{credits}</Text>
             <Text style={[typography.labelLg, { color: colors.tertiaryContainer }]}>Credits</Text>
           </View>
           <View style={styles.rewardDivider} />
-        </View>
+        </Animated.View>
 
         {/* Encouragement */}
         <Text style={[typography.bodyLg, styles.encouragement]}>

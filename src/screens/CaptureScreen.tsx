@@ -1,5 +1,5 @@
-import React, { useRef, useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
+import { View, Text, Pressable, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -17,6 +17,11 @@ import type { RootStackParamList } from '../navigation/types';
 
 type Phase = 'camera' | 'review';
 
+const MAX_DURATION_SECONDS = 30;
+// When the user crosses this many seconds we tint the counter to warn them
+// that the hard cap is approaching. They can still stop at any point.
+const WARNING_THRESHOLD_SECONDS = 24;
+
 export function CaptureScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'Capture'>>();
@@ -32,13 +37,43 @@ export function CaptureScreen() {
   const [videoUri, setVideoUri] = useState<string | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
   const [elapsed, setElapsed] = useState(0);
-  const [captureLocation, setCaptureLocation] = useState<{ latitude: number; longitude: number } | undefined>();
+  const [captureLocation, setCaptureLocation] = useState<
+    { latitude: number; longitude: number } | undefined
+  >();
+
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const mountedRef = useRef(true);
+  // Synchronous tracker for "is recording right now". React state lags a frame,
+  // so using the state alone causes a race where the stop button is a no-op
+  // while recordAsync is still being invoked asynchronously.
+  const recordingRef = useRef(false);
+
+  // Lifecycle cleanup — clear timer and stop any in-flight recording on unmount.
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      if (recordingRef.current && cameraRef.current) {
+        try {
+          cameraRef.current.stopRecording();
+        } catch {
+          // no-op
+        }
+      }
+      recordingRef.current = false;
+    };
+  }, []);
 
   // -- Timer for recording duration --
   const startTimer = useCallback(() => {
     setElapsed(0);
+    if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
+      if (!mountedRef.current) return;
       setElapsed((prev) => prev + 1);
     }, 1000);
   }, []);
@@ -50,63 +85,111 @@ export function CaptureScreen() {
     }
   }, []);
 
-  const formatTime = (secs: number) => {
-    const m = Math.floor(secs / 60).toString().padStart(2, '0');
-    const s = (secs % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
+  // Display "12/30s" while recording so the user can feel the budget.
+  const formatElapsedWithLimit = (secs: number) => {
+    const clamped = Math.min(secs, MAX_DURATION_SECONDS);
+    return `${clamped}/${MAX_DURATION_SECONDS}s`;
   };
 
+  // GPS is optional and may take several seconds. It MUST NOT block recording
+  // start — otherwise tapping "stop" on the UI acts on a camera that hasn't
+  // started yet and the recording can't be interrupted until maxDuration.
+  const fetchLocation = useCallback(async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') return;
+      const loc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      if (!mountedRef.current) return;
+      setCaptureLocation({
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+      });
+    } catch {
+      // GPS is optional — missing location is fine for non-medication routines.
+    }
+  }, []);
+
   // -- Recording --
-  const startRecording = async () => {
-    if (!cameraRef.current || !cameraReady) return;
+  const startRecording = useCallback(async () => {
+    if (!cameraRef.current || !cameraReady || recordingRef.current) return;
+
+    // Flip both trackers immediately so the stop button becomes live the moment
+    // recordAsync kicks off.
+    recordingRef.current = true;
     setRecording(true);
     startTimer();
 
-    // Grab GPS location silently
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status === 'granted') {
-        const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-        setCaptureLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
-      }
-    } catch {}
+    // Fire off location fetch in parallel — deliberately not awaited.
+    fetchLocation();
 
     try {
-      const result = await cameraRef.current.recordAsync({ maxDuration: 10 });
+      // recordAsync resolves when the recording ENDS (via stopRecording or
+      // maxDuration). It starts the native recorder synchronously when called.
+      //
+      // We intentionally record at the device-native high quality — the user
+      // sees a smooth preview and a crisp clip on the review screen. The
+      // verification server downsamples to 15fps / 480p before sending to
+      // Nova, so uploading from the phone stays fast without sacrificing
+      // on-device visual quality.
+      const result = await cameraRef.current.recordAsync({
+        maxDuration: MAX_DURATION_SECONDS,
+      });
+      if (!mountedRef.current) return;
       if (result?.uri) {
         setVideoUri(result.uri);
         setPhase('review');
       }
     } catch {
-      // recording was stopped or errored
+      // Recording was stopped or errored — nothing to surface.
     } finally {
-      setRecording(false);
-      stopTimer();
+      recordingRef.current = false;
+      if (mountedRef.current) {
+        setRecording(false);
+        stopTimer();
+      }
     }
-  };
+  }, [cameraReady, startTimer, stopTimer, fetchLocation]);
 
-  const stopRecording = () => {
-    cameraRef.current?.stopRecording();
-    stopTimer();
-  };
+  const stopRecording = useCallback(() => {
+    if (!recordingRef.current || !cameraRef.current) return;
+    try {
+      cameraRef.current.stopRecording();
+    } catch {
+      // The recordAsync promise will still settle and drive the UI forward.
+    }
+  }, []);
 
-  const handleCapturePress = () => {
-    if (recording) {
+  const handleCapturePress = useCallback(() => {
+    // Use the synchronous ref so the very first tap after starting always
+    // takes the correct branch even if React hasn't flushed the setRecording
+    // state update yet.
+    if (recordingRef.current) {
       stopRecording();
     } else {
       startRecording();
     }
-  };
+  }, [startRecording, stopRecording]);
 
-  const handleRetake = () => {
+  const handleRetake = useCallback(() => {
     setVideoUri(null);
     setPhase('camera');
     setElapsed(0);
-  };
+    // CameraView unmounted during the review phase. When we re-enter camera
+    // phase a fresh instance mounts and will fire onCameraReady again. Reset
+    // the flag so we actually wait for that signal instead of acting on the
+    // stale "ready" state from the previous session.
+    setCameraReady(false);
+  }, []);
 
-  const handleSubmit = () => {
-    navigation.replace('Verifying', { routine, videoUri: videoUri ?? undefined, location: captureLocation });
-  };
+  const handleSubmit = useCallback(() => {
+    navigation.replace('Verifying', {
+      routine,
+      videoUri: videoUri ?? undefined,
+      location: captureLocation,
+    });
+  }, [navigation, routine, videoUri, captureLocation]);
 
   // -- Permissions --
   if (!cameraPermission || !micPermission) {
@@ -172,31 +255,42 @@ export function CaptureScreen() {
 
         {/* Top Controls */}
         <View style={styles.topControls}>
-          <TouchableOpacity
+          <Pressable
             onPress={() => navigation.goBack()}
-            style={styles.overlayBtn}
+            style={({ pressed }) => [styles.overlayBtn, pressed && styles.overlayBtnPressed]}
             accessibilityLabel="Close camera"
+            accessibilityRole="button"
+            hitSlop={8}
           >
             <MaterialIcons name="close" size={24} color="#fff" />
-          </TouchableOpacity>
+          </Pressable>
 
           {recording && (
-            <View style={styles.recBadge}>
+            <View
+              style={[
+                styles.recBadge,
+                elapsed >= WARNING_THRESHOLD_SECONDS && styles.recBadgeWarning,
+              ]}
+              accessibilityLabel={`Recording ${elapsed} of ${MAX_DURATION_SECONDS} seconds`}
+              accessibilityLiveRegion="polite"
+            >
               <View style={styles.recDot} />
               <Text style={[typography.labelLg, { color: '#fff' }]}>
-                {formatTime(elapsed)}
+                {formatElapsedWithLimit(elapsed)}
               </Text>
             </View>
           )}
 
           {!recording && (
-            <TouchableOpacity
+            <Pressable
               onPress={() => setFacing((f) => (f === 'back' ? 'front' : 'back'))}
-              style={styles.overlayBtn}
+              style={({ pressed }) => [styles.overlayBtn, pressed && styles.overlayBtnPressed]}
               accessibilityLabel="Flip camera"
+              accessibilityRole="button"
+              hitSlop={8}
             >
               <MaterialIcons name="flip-camera-ios" size={24} color="#fff" />
-            </TouchableOpacity>
+            </Pressable>
           )}
         </View>
 
@@ -218,14 +312,20 @@ export function CaptureScreen() {
       <View style={styles.controls}>
         <View style={styles.controlSpacer} />
 
-        <TouchableOpacity
+        <Pressable
           onPress={handleCapturePress}
-          style={[styles.captureBtn, recording && styles.captureBtnRec]}
+          style={({ pressed }) => [
+            styles.captureBtn,
+            recording && styles.captureBtnRec,
+            pressed && styles.captureBtnPressed,
+          ]}
           accessibilityLabel={recording ? 'Stop recording' : 'Start recording'}
+          accessibilityRole="button"
+          accessibilityState={{ busy: recording }}
           disabled={!cameraReady}
         >
           <View style={[styles.captureInner, recording && styles.captureInnerRec]} />
-        </TouchableOpacity>
+        </Pressable>
 
         <View style={styles.controlSpacer} />
       </View>
@@ -235,8 +335,8 @@ export function CaptureScreen() {
           {!cameraReady
             ? 'Preparing camera...'
             : recording
-            ? 'Perform the routine, then tap to stop'
-            : 'Tap to start recording your routine'}
+            ? `Perform the routine, then tap to stop · up to ${MAX_DURATION_SECONDS}s`
+            : `Tap to start recording · up to ${MAX_DURATION_SECONDS}s`}
         </Text>
       </View>
     </SafeAreaView>
@@ -260,6 +360,15 @@ function ReviewPhase({
     p.loop = true;
     p.play();
   });
+  const [submitting, setSubmitting] = React.useState(false);
+
+  const handleSubmit = () => {
+    if (submitting) return;
+    setSubmitting(true);
+    // Give the UI a beat to show the spinner before navigating, so the
+    // user gets immediate feedback that their tap was received.
+    setTimeout(() => onSubmit(), 50);
+  };
 
   return (
     <View style={styles.reviewContainer}>
@@ -282,11 +391,12 @@ function ReviewPhase({
         </Text>
 
         <View style={styles.reviewActions}>
-          <Button label="Submit for Verification" onPress={onSubmit} />
+          <Button label="Submit for Verification" onPress={handleSubmit} loading={submitting} />
           <Button
             label="Retake"
             variant="secondary"
             onPress={onRetake}
+            disabled={submitting}
             icon={<MaterialIcons name="replay" size={18} color={colors.primary} />}
           />
         </View>
@@ -341,6 +451,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  overlayBtnPressed: {
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    opacity: 0.9,
+  },
   recBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -349,6 +463,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 9999,
+  },
+  recBadgeWarning: {
+    // Tint brighter red when the hard cap is within ~6 seconds so the user
+    // knows recording will auto-stop shortly.
+    backgroundColor: 'rgba(224,58,48,0.95)',
   },
   recDot: {
     width: 8,
@@ -394,6 +513,9 @@ const styles = StyleSheet.create({
   },
   captureBtnRec: {
     borderColor: colors.error,
+  },
+  captureBtnPressed: {
+    transform: [{ scale: 0.94 }],
   },
   captureInner: {
     width: 60,

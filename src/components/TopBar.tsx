@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { View, Text, Pressable, Image, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { colors, spacing, typography } from '../theme';
@@ -19,23 +19,36 @@ export function TopBar({ title = 'Rhythm', onAvatarPress, onSettingsPress }: Pro
     onSettingsPress?.();
   };
 
+  const handleAvatarPress = () => {
+    if (onAvatarPress) {
+      Haptics.selectionAsync();
+      onAvatarPress();
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        onPress={onAvatarPress}
-        style={styles.avatar}
-        accessibilityLabel="Profile"
+      <Pressable
+        onPress={handleAvatarPress}
+        style={({ pressed }) => [styles.avatar, pressed && styles.pressed]}
+        accessibilityLabel="Open profile"
+        accessibilityRole="button"
+        hitSlop={8}
       >
         <Image source={{ uri: AVATAR_URI }} style={styles.avatarImage} />
-      </TouchableOpacity>
-      <Text style={styles.title}>{title}</Text>
-      <TouchableOpacity
+      </Pressable>
+      <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
+        {title}
+      </Text>
+      <Pressable
         onPress={handleSettingsPress}
-        style={styles.iconBtn}
-        accessibilityLabel="Settings"
+        style={({ pressed }) => [styles.iconBtn, pressed && styles.pressed]}
+        accessibilityLabel="Open settings"
+        accessibilityRole="button"
+        hitSlop={8}
       >
         <MaterialIcons name="settings" size={24} color={colors.primaryContainer} />
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 }
@@ -48,6 +61,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.marginPage,
     paddingVertical: 16,
     backgroundColor: colors.topBar,
+  },
+  pressed: {
+    opacity: 0.72,
   },
   avatar: {
     width: 40,
@@ -64,6 +80,7 @@ const styles = StyleSheet.create({
     ...typography.headlineMd,
     color: colors.primaryContainer,
     letterSpacing: -0.3,
+    marginHorizontal: spacing.stackSm,
   },
   iconBtn: {
     width: 40,

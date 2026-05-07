@@ -21,6 +21,7 @@ type Props = {
 
 export function VideoThumb({ videoUri, size = 48 }: Props) {
   const currentVideoUri = useRef(videoUri);
+  const generatingRef = useRef(false);
   const [thumbnail, setThumbnail] = useState<VideoThumbnail | null>(
     () => thumbnailCache.get(videoUri) ?? null
   );
@@ -37,6 +38,7 @@ export function VideoThumb({ videoUri, size = 48 }: Props) {
     if (!cachedThumbnail) {
       const cancelRequest = requestThumbnailSlot(() => {
         if (!cancelled) {
+          generatingRef.current = true;
           setShouldGenerate(true);
         }
       });
@@ -44,6 +46,12 @@ export function VideoThumb({ videoUri, size = 48 }: Props) {
       return () => {
         cancelled = true;
         cancelRequest();
+        // If generation started but didn't finish before unmount/change,
+        // release the slot so the queue doesn't stall.
+        if (generatingRef.current) {
+          generatingRef.current = false;
+          releaseThumbnailSlot();
+        }
       };
     }
 
@@ -53,8 +61,11 @@ export function VideoThumb({ videoUri, size = 48 }: Props) {
   }, [videoUri]);
 
   const handleGenerated = useCallback((generatedThumbnail: VideoThumbnail | null) => {
+    const stillMounted = generatingRef.current;
+    generatingRef.current = false;
+
     if (currentVideoUri.current !== videoUri) {
-      releaseThumbnailSlot();
+      if (stillMounted) releaseThumbnailSlot();
       return;
     }
 
@@ -63,7 +74,7 @@ export function VideoThumb({ videoUri, size = 48 }: Props) {
       setThumbnail(generatedThumbnail);
     }
     setShouldGenerate(false);
-    releaseThumbnailSlot();
+    if (stillMounted) releaseThumbnailSlot();
   }, [videoUri]);
 
   if (!thumbnail) {

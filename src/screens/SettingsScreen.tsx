@@ -133,10 +133,16 @@ export function SettingsScreen() {
                   style={[styles.stepperBtn, dailyGoal <= 1 && styles.stepperBtnDisabled]}
                   disabled={dailyGoal <= 1}
                   accessibilityLabel="Decrease daily goal"
+                  accessibilityHint={`Current goal: ${dailyGoal} per day. Minimum 1.`}
+                  accessibilityRole="button"
                 >
                   <MaterialIcons name="remove" size={18} color={dailyGoal <= 1 ? colors.outlineVariant : colors.primary} />
                 </Pressable>
-                <Text style={[typography.headlineMd, { color: colors.primary, minWidth: 28, textAlign: 'center' }]}>
+                <Text
+                  style={[typography.headlineMd, { color: colors.primary, minWidth: 28, textAlign: 'center' }]}
+                  accessibilityLiveRegion="polite"
+                  accessibilityLabel={`Daily goal: ${dailyGoal} routines`}
+                >
                   {dailyGoal}
                 </Text>
                 <Pressable
@@ -147,6 +153,8 @@ export function SettingsScreen() {
                   style={[styles.stepperBtn, dailyGoal >= 14 && styles.stepperBtnDisabled]}
                   disabled={dailyGoal >= 14}
                   accessibilityLabel="Increase daily goal"
+                  accessibilityHint={`Current goal: ${dailyGoal} per day. Maximum 14.`}
+                  accessibilityRole="button"
                 >
                   <MaterialIcons name="add" size={18} color={dailyGoal >= 14 ? colors.outlineVariant : colors.primary} />
                 </Pressable>

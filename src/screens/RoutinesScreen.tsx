@@ -232,24 +232,21 @@ export function RoutinesScreen() {
           contentContainerStyle={styles.filterRow}
         >
           {FILTER_OPTIONS.map((option) => (
-            <React.Fragment
+            <Chip
               key={option.key}
-            >
-              <Chip
-                label={option.label}
-                active={filter === option.value}
-                onPress={() => handleFilterPress(option)}
-                icon={
-                  option.icon ? (
-                    <MaterialIcons
-                      name={option.icon}
-                      size={16}
-                      color={filter === option.value ? colors.primary : colors.onSurfaceVariant}
-                    />
-                  ) : undefined
-                }
-              />
-            </React.Fragment>
+              label={option.label}
+              active={filter === option.value}
+              onPress={() => handleFilterPress(option)}
+              icon={
+                option.icon ? (
+                  <MaterialIcons
+                    name={option.icon}
+                    size={16}
+                    color={filter === option.value ? colors.primary : colors.onSurfaceVariant}
+                  />
+                ) : undefined
+              }
+            />
           ))}
         </ScrollView>
 

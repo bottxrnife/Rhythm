@@ -5,9 +5,9 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 
 // Mock expo-haptics
 jest.mock('expo-haptics', () => ({
-  selectionAsync: jest.fn(),
-  impactAsync: jest.fn(),
-  notificationAsync: jest.fn(),
+  selectionAsync: jest.fn(() => Promise.resolve()),
+  impactAsync: jest.fn(() => Promise.resolve()),
+  notificationAsync: jest.fn(() => Promise.resolve()),
   ImpactFeedbackStyle: { Light: 'light', Medium: 'medium', Heavy: 'heavy' },
   NotificationFeedbackType: { Success: 'success', Warning: 'warning', Error: 'error' },
 }));
@@ -33,6 +33,49 @@ jest.mock('expo-video', () => ({
   useVideoPlayer: jest.fn(() => ({ play: jest.fn(), loop: false })),
   VideoView: 'VideoView',
 }));
+
+// Mock @expo/vector-icons — icon lookup hits expo-font which hits expo-modules-core
+jest.mock('@expo/vector-icons', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  const Icon = (props) => React.createElement(View, { ...props, accessible: false });
+  const noop = () => Icon;
+  return {
+    MaterialIcons: Icon,
+    MaterialCommunityIcons: Icon,
+    Ionicons: Icon,
+    Feather: Icon,
+    AntDesign: Icon,
+    Entypo: Icon,
+    FontAwesome: Icon,
+    FontAwesome5: Icon,
+    createIconSet: noop,
+    createIconSetFromFontello: noop,
+    createIconSetFromIcoMoon: noop,
+  };
+});
+
+// Mock expo-file-system legacy API (needed for verification.ts import)
+jest.mock(
+  'expo-file-system/legacy',
+  () => ({
+    readAsStringAsync: jest.fn(() => Promise.resolve('dGVzdA==')),
+    EncodingType: { Base64: 'base64', UTF8: 'utf8' },
+  }),
+  { virtual: true }
+);
+
+// Mock expo-constants (used to derive LAN IP for verification endpoint)
+jest.mock(
+  'expo-constants',
+  () => ({
+    __esModule: true,
+    default: {
+      expoConfig: { hostUri: '127.0.0.1:8081' },
+    },
+  }),
+  { virtual: true }
+);
 
 // Mock expo-image
 jest.mock('expo-image', () => ({

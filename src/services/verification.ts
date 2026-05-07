@@ -11,10 +11,26 @@
  * Enable Demo Mode in Settings to skip real verification for testing.
  */
 
-import * as FileSystem from 'expo-file-system';
-import Constants from 'expo-constants';
+import * as FileSystem from 'expo-file-system/legacy';
 import { NativeModules, Platform } from 'react-native';
 import { isDemoMode } from '../state/Settings';
+
+// expo-constants is installed transitively via `expo` — use a lazy require so
+// TypeScript doesn't error on missing types and so we fall back gracefully if
+// the module isn't resolvable at runtime.
+function getExpoHostUri(): string | undefined {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const Constants = require('expo-constants').default ?? require('expo-constants');
+    const hostUri =
+      Constants?.expoConfig?.hostUri ??
+      Constants?.manifest?.debuggerHost ??
+      Constants?.manifest2?.extra?.expoClient?.hostUri;
+    return typeof hostUri === 'string' ? hostUri : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 // ── Verification API endpoint ──
 // Local server: run `python3 backend/local_server.py` and use your Mac's IP
@@ -39,13 +55,7 @@ function getVerificationEndpoint(): string {
   }
 
   // In Expo dev, derive the LAN IP from the Metro host.
-  // Examples:
-  // - hostUri: "10.44.19.61:8081"
-  // - debuggerHost: "10.44.19.61:8081"
-  const hostUri =
-    Constants.expoConfig?.hostUri ??
-    (Constants as any)?.manifest?.debuggerHost ??
-    (Constants as any)?.manifest2?.extra?.expoClient?.hostUri;
+  const hostUri = getExpoHostUri();
 
   const host = typeof hostUri === 'string' ? hostUri.split(':')[0] : undefined;
 
@@ -73,6 +83,7 @@ export type VerificationResult = {
   verified: boolean;
   confidence: number;
   reason: string;
+  shortReason: string;
   model: string;
   processingTimeMs: number;
   x402PaymentId?: string;
@@ -95,6 +106,7 @@ export async function verifyRoutine(
       verified: true,
       confidence: 0.95,
       reason: 'Demo mode — verification bypassed',
+      shortReason: 'routine verified',
       model: 'demo',
       processingTimeMs: Date.now() - startTime,
       x402PaymentId: `x402_demo_${Date.now().toString(36)}`,
@@ -167,6 +179,7 @@ export async function verifyRoutine(
     verified: data.verified ?? false,
     confidence: data.confidence ?? 0,
     reason: data.reason ?? '',
+    shortReason: data.short_reason ?? (data.verified ? 'routine verified' : 'could not verify routine'),
     model: data.model ?? BEDROCK_MODEL_ID,
     processingTimeMs: Date.now() - startTime,
     x402PaymentId: data.x402_payment_id,
