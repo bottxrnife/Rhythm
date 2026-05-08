@@ -489,3 +489,154 @@ Rhythm Verification Server
 
   ✓ VERIFIED — routine verified (confidence 0.90)
   x402 payment_id: x402_e0a938f4c83ddf76_1778156584
+
+Shutting down...
+
+Rhythm Verification Server
+  Model:    us.amazon.nova-2-lite-v1:0
+  Region:   us-east-1
+  Port:     3001
+  Encode:   15fps @ 480px long-edge, preset=ultrafast, crf=30, max 30s
+  ffmpeg:   ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers
+  Log file: /Users/martinliu/Downloads/rhythm/Rhythm/backend/server.log
+
+  Nova 2 Lite: connected
+
+  Listening on http://0.0.0.0:3001/verify
+  Tail logs with: tail -f /Users/martinliu/Downloads/rhythm/Rhythm/backend/server.log
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+▶ 11:11:07 POST /verify  id=534cc19f
+  routine: hydrate
+  sponsor: Liquid Death
+  wallet:  6Ee9n8tTAX...vMxfCp
+  location: 25.7944,-80.1335
+  payload: 28.84 MB base64, read in 6290ms
+  video:   21.63 MB decoded (22,682,784 bytes)
+  Calling Nova 2 Lite (us.amazon.nova-2-lite-v1:0)...
+  Encode: input  1920x1080 · 30.0fps · 8.9s · h264 · 20304kbps (21.63 MB)
+  Encode: output 270x480 · 15.0fps · 8.9s · h264 · 467kbps (510.3 KB, 2.3% of input) in 513ms
+
+  ── Nova raw response ──
+  stopReason:  end_turn
+  tokens:      in=1931  out=87  total=2018
+  bedrock latencyMs: 1747
+  judgment (parsed from Nova output):
+    {
+      "verified": false,
+      "confidence": 0.1,
+      "product_visible": false,
+      "product_in_use": false,
+      "routine_completed": false,
+      "appears_genuine": true,
+      "reason": "The video does not show any Liquid Death product or any hydration activity.",
+      "short_reason": "no product or hydration activity visible"
+    }
+
+  ── Policy ──
+  sponsored:   True   confidence: 0.10   verified(model): False
+  × Confidence 0.10 below 0.70
+  × Sponsor product not visible
+  × Product not actively used
+  × Routine not completed
+
+  ── Timing breakdown ──
+  encode:          606 ms
+  bedrock:        2226 ms
+  read+parse:     6290 ms
+  other:            64 ms
+  total:          9186 ms
+
+  ✗ NOT VERIFIED — no product or hydration activity visible (confidence 0.10)
+  model reason: The video does not show any Liquid Death product or any hydration activity.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+▶ 11:15:35 POST /verify  id=a9745b9e
+  routine: hydrate
+  sponsor: Liquid Death
+  wallet:  6Ee9n8tTAX...vMxfCp
+  location: 25.7944,-80.1335
+  payload: 13.24 MB base64, read in 2832ms
+  video:   9.93 MB decoded (10,409,488 bytes)
+  Calling Nova 2 Lite (us.amazon.nova-2-lite-v1:0)...
+  Encode: input  1920x1080 · 30.0fps · 4.1s · h264 · 20469kbps (9.93 MB)
+  Encode: output 270x480 · 15.0fps · 4.1s · h264 · 468kbps (232.6 KB, 2.3% of input) in 259ms
+
+  ── Nova raw response ──
+  stopReason:  end_turn
+  tokens:      in=1931  out=95  total=2026
+  bedrock latencyMs: 1124
+  judgment (parsed from Nova output):
+    {
+      "verified": false,
+      "confidence": 0.4,
+      "product_visible": false,
+      "product_in_use": false,
+      "routine_completed": false,
+      "appears_genuine": true,
+      "reason": "The product is not clearly visible and the label is not readable, making it impossible to confirm if it is Liquid Death.",
+      "short_reason": "product label not readable"
+    }
+
+  ── Policy ──
+  sponsored:   True   confidence: 0.40   verified(model): False
+  × Confidence 0.40 below 0.70
+  × Sponsor product not visible
+  × Product not actively used
+  × Routine not completed
+
+  ── Timing breakdown ──
+  encode:          339 ms
+  bedrock:        1333 ms
+  read+parse:     2832 ms
+  other:            32 ms
+  total:          4536 ms
+
+  ✗ NOT VERIFIED — product label not readable (confidence 0.40)
+  model reason: The product is not clearly visible and the label is not readable, making it impossible to confirm if it is Liquid Death.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+▶ 11:19:22 POST /verify  id=58cdc63b
+  routine: hydrate
+  sponsor: Liquid Death
+  wallet:  6Ee9n8tTAX...vMxfCp
+  location: 25.7944,-80.1335
+  payload: 14.13 MB base64, read in 3029ms
+  video:   10.60 MB decoded (11,111,427 bytes)
+  Calling Nova 2 Lite (us.amazon.nova-2-lite-v1:0)...
+  Encode: input  1920x1080 · 30.0fps · 4.4s · h264 · 20336kbps (10.60 MB)
+  Encode: output 270x480 · 15.0fps · 4.4s · h264 · 420kbps (226.1 KB, 2.1% of input) in 278ms
+
+  ── Nova raw response ──
+  stopReason:  end_turn
+  tokens:      in=1931  out=84  total=2015
+  bedrock latencyMs: 1037
+  judgment (parsed from Nova output):
+    {
+      "verified": false,
+      "confidence": 0.1,
+      "product_visible": false,
+      "product_in_use": false,
+      "routine_completed": false,
+      "appears_genuine": true,
+      "reason": "The video does not show any hydration activity or Liquid Death product.",
+      "short_reason": "no hydration activity shown"
+    }
+
+  ── Policy ──
+  sponsored:   True   confidence: 0.10   verified(model): False
+  × Confidence 0.10 below 0.70
+  × Sponsor product not visible
+  × Product not actively used
+  × Routine not completed
+
+  ── Timing breakdown ──
+  encode:          372 ms
+  bedrock:        1293 ms
+  read+parse:     3029 ms
+  other:            32 ms
+  total:          4726 ms
+
+  ✗ NOT VERIFIED — no hydration activity shown (confidence 0.10)
+  model reason: The video does not show any hydration activity or Liquid Death product.
